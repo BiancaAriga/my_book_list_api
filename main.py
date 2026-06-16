@@ -1,11 +1,3 @@
-"""
-.\venv\Scripts\Activate.ps1 ---> para ativar o ambiente virtual
-uvicorn main:app --reload ---> para rodar a aplicação
-
-ruff check . --fix ---> para corrigir os erros de linting
-black . ---> para formatar o código
-"""
-
 from typing import Annotated
 
 from fastapi import FastAPI, Depends, status, HTTPException
