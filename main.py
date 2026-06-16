@@ -6,14 +6,18 @@ ruff check . --fix ---> para corrigir os erros de linting
 black . ---> para formatar o código
 """
 
-from fastapi import FastAPI, Depends, status
+from typing import Annotated
 
-from sqlmodel import SQLModel, Session
+from fastapi import FastAPI, Depends, status, HTTPException
+
+from sqlmodel import SQLModel, Session, select
 
 from database import engine, get_session
 
 from models.livro import Livro
-from schemas.livro import LivroCreate
+from schemas.livro import LivroCreate, LivroUpdate
+
+SessionDep = Annotated[Session, Depends(get_session)]
 
 app = FastAPI()
 
@@ -21,11 +25,6 @@ app = FastAPI()
 @app.on_event("startup")
 def on_startup():
     SQLModel.metadata.create_all(engine)
-
-
-@app.get("/")
-def home():
-    return {"mensagem": "API funcionando"}
 
 
 @app.post(
@@ -36,7 +35,7 @@ def home():
     description="Cadastra um novo livro na lista de leitura do usuário.",
     tags=["Livros"],
 )
-def criar_livro(livro: LivroCreate, session: Session = Depends(get_session)):
+def criar_livro(livro: LivroCreate, session: SessionDep) -> Livro:
     novo_livro = Livro(**livro.model_dump())
 
     session.add(novo_livro)
@@ -46,3 +45,74 @@ def criar_livro(livro: LivroCreate, session: Session = Depends(get_session)):
     session.refresh(novo_livro)
 
     return novo_livro
+
+
+@app.delete(
+    "/livros/{livro_id}",
+    status_code=status.HTTP_204_NO_CONTENT,
+    summary="Deletar livro",
+    description="Deleta um livro da lista de leitura do usuário.",
+    tags=["Livros"],
+)
+def deletar_livro(livro_id: int, session: SessionDep):
+    livro = session.get(Livro, livro_id)
+
+    if not livro:
+        raise HTTPException(status_code=404, detail="Livro não encontrado")
+
+    session.delete(livro)
+    session.commit()
+
+
+@app.get(
+    "/livros/",
+    response_model=list[Livro],
+    summary="Listar livros",
+    description="Lista todos os livros da lista de leitura do usuário.",
+    tags=["Livros"],
+)
+def ler_livros(
+    session: SessionDep,
+) -> list[Livro]:
+    return session.exec(select(Livro)).all()
+
+
+@app.get(
+    "/livros/{livro_id}",
+    response_model=Livro,
+    summary="Listar livro",
+    description="Lista um livro específico da lista de leitura do usuário.",
+    tags=["Livros"],
+)
+def ler_livro(
+    livro_id: int,
+    session: SessionDep,
+) -> Livro:
+    livro = session.get(Livro, livro_id)
+    if not livro:
+        raise HTTPException(status_code=404, detail="Livro não encontrado")
+    return livro
+
+
+@app.put(
+    "/livros/{livro_id}",
+    response_model=Livro,
+    summary="Atualizar livro",
+    description="Atualiza as informações de um livro específico da lista de leitura do usuário.",
+    tags=["Livros"],
+)
+def atualizar_livro(
+    livro_id: int,
+    livro_update: LivroUpdate,
+    session: SessionDep,
+) -> Livro:
+    livro = session.get(Livro, livro_id)
+    if not livro:
+        raise HTTPException(status_code=404, detail="Livro não encontrado")
+
+    for key, value in livro_update.model_dump(exclude_unset=True).items():
+        setattr(livro, key, value)
+
+    session.commit()
+    session.refresh(livro)
+    return livro

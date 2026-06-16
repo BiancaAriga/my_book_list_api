@@ -5,7 +5,7 @@ from sqlmodel import SQLModel, Field
 from enum import Enum
 
 
-class StatusLivro(str, Enum):
+class LivroStatus(str, Enum):
     QUERO_LER = "Quero Ler"
     LENDO = "Lendo"
     FINALIZADO = "Finalizado"
@@ -29,4 +29,4 @@ class Livro(SQLModel, table=True):
 
     data_fim: Optional[date] = None
 
-    status: StatusLivro = StatusLivro.QUERO_LER
+    status: LivroStatus = LivroStatus.QUERO_LER
