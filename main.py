@@ -2,6 +2,8 @@ from typing import Annotated
 
 from fastapi import FastAPI, Depends, status, HTTPException
 
+from fastapi.middleware.cors import CORSMiddleware
+
 from sqlmodel import SQLModel, Session, select
 
 from database import engine, get_session
@@ -12,6 +14,17 @@ from schemas.livro import LivroCreate, LivroUpdate
 SessionDep = Annotated[Session, Depends(get_session)]
 
 app = FastAPI()
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=[
+        "http://127.0.0.1:5500",
+        "http://localhost:5500",
+    ],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
 
 @app.on_event("startup")
@@ -57,7 +70,7 @@ def deletar_livro(livro_id: int, session: SessionDep):
 
 
 @app.get(
-    "/livros/",
+    "/livros",
     response_model=list[Livro],
     summary="Listar livros",
     description="Lista todos os livros da lista de leitura do usuário.",
