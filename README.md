@@ -10,11 +10,17 @@ Este projeto é uma API simples de lista de leitura de livros construída com Fa
 - Ambiente virtual Python configurado
 - Dependências instaladas via `requirements.txt`
 
+## Instalar as dependências
+
+- Crie um ambiente virtual, rodando no terminal: python -m venv .venv
+- Ative, rodando no terminal: `.venv\Scripts\activate` ou `.\venv\Scripts\Activate.ps1`
+- Instale as dependências: pip install -r requirements.txt
+
 ## Como rodar o projeto
 
 1. Abra um terminal na pasta do projeto.
 2. Ative o ambiente virtual:
-   - Windows PowerShell: `.\venv\Scripts\Activate.ps1`
+   - Windows PowerShell: `.venv\Scripts\activate` ou `.\venv\Scripts\Activate.ps1`
 3. Inicie a aplicação:
    - `uvicorn main:app --reload`
 4. A API estará disponível em `http://127.0.0.1:8000`

@@ -19,6 +19,7 @@ app.add_middleware(
     CORSMiddleware,
     allow_origins=[
         "http://127.0.0.1:5500",
+        "http://127.0.0.1:5501",
         "http://localhost:5500",
     ],
     allow_credentials=True,
@@ -80,24 +81,7 @@ def ler_livros(
     session: SessionDep,
 ) -> list[Livro]:
     return session.exec(select(Livro)).all()
-
-
-@app.get(
-    "/livros/{livro_id}",
-    response_model=Livro,
-    summary="Listar livro",
-    description="Lista um livro específico da lista de leitura do usuário.",
-    tags=["Livros"],
-)
-def ler_livro(
-    livro_id: int,
-    session: SessionDep,
-) -> Livro:
-    livro = session.get(Livro, livro_id)
-    if not livro:
-        raise HTTPException(status_code=404, detail="Livro não encontrado")
-    return livro
-
+    
 
 @app.put(
     "/livros/{livro_id}",
