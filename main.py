@@ -8,7 +8,7 @@ from sqlmodel import SQLModel, Session, select
 
 from database import engine, get_session
 
-from models.livro import Livro
+from models.livro import Livro, LivroStatus
 from schemas.livro import LivroCreate, LivroUpdate
 
 SessionDep = Annotated[Session, Depends(get_session)]
@@ -74,14 +74,20 @@ def deletar_livro(livro_id: int, session: SessionDep):
     "/livros",
     response_model=list[Livro],
     summary="Listar livros",
-    description="Lista todos os livros da lista de leitura do usuário.",
+    description="Lista todos os livros da lista de leitura do usuário. Opcionalmente, permite filtrar os resultados por status.",
     tags=["Livros"],
 )
 def ler_livros(
     session: SessionDep,
+    status: LivroStatus | None = None,
 ) -> list[Livro]:
-    return session.exec(select(Livro)).all()
-    
+    consulta = select(Livro)
+
+    if status is not None:
+        consulta = consulta.where(Livro.status == status)
+
+    return session.exec(consulta).all()
+
 
 @app.put(
     "/livros/{livro_id}",

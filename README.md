@@ -32,6 +32,14 @@ Após iniciar a aplicação, use um navegador para acessar:
 - Swagger UI: `http://127.0.0.1:8000/docs`
 - ReDoc: `http://127.0.0.1:8000/redoc`
 
+## Tecnologias utilizadas
+
+- Python 3.11
+- FastAPI para a criação da API
+- SQLModel para modelagem de dados e integração com o banco
+- Uvicorn como servidor ASGI
+- Pydantic para validação de dados
+
 ## Comandos úteis
 
 - `ruff check . --fix` ---> para corrigir os erros de linting
