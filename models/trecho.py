@@ -1,7 +1,9 @@
-from typing import Optional
+from typing import Optional, TYPE_CHECKING
 
-from sqlmodel import SQLModel, Relationship, Field
-from models.livro import Livro
+from sqlmodel import SQLModel, Field, Relationship
+
+if TYPE_CHECKING:
+    from models.livro import Livro
 
 
 class Trecho(SQLModel, table=True):
@@ -13,4 +15,4 @@ class Trecho(SQLModel, table=True):
 
     livro_id: int = Field(foreign_key="livros.id")
 
-    livro: "Livro" = Relationship(back_populates="trechos")
+    livro: Optional["Livro"] = Relationship(back_populates="trechos")
