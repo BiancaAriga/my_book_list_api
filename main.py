@@ -11,6 +11,9 @@ from database import engine, get_session
 from models.livro import Livro, LivroStatus
 from schemas.livro import LivroCreate, LivroUpdate
 
+from models.trecho import Trecho
+from schemas.trecho import TrechoCreate
+
 SessionDep = Annotated[Session, Depends(get_session)]
 
 app = FastAPI()
@@ -111,3 +114,64 @@ def atualizar_livro(
     session.commit()
     session.refresh(livro)
     return livro
+
+
+@app.post(
+    "/livros/{livro_id}/trechos",
+    response_model=Trecho,
+    status_code=status.HTTP_201_CREATED,
+    summary="Cadastrar trecho",
+    description="Cadastra um novo trecho na lista de leitura do usuário.",
+    tags=["Trechos"],
+)
+def criar_trecho(livro_id: int, trecho: TrechoCreate, session: SessionDep) -> Trecho:
+    livro = session.get(Livro, livro_id)
+
+    if not livro:
+        raise HTTPException(status_code=404, detail="Livro não encontrado")
+
+    novo_trecho = Trecho(**trecho.model_dump(), livro_id=livro_id)
+
+    session.add(novo_trecho)
+
+    session.commit()
+
+    session.refresh(novo_trecho)
+
+    return novo_trecho
+
+
+@app.get(
+    "/livros/{livro_id}/trechos",
+    response_model=list[Trecho],
+    summary="Listar trechos",
+    description="Lista todos os trechos de um livro específico.",
+    tags=["Trechos"],
+)
+def ler_trechos(
+    livro_id: int,
+    session: SessionDep,
+) -> list[Trecho]:
+    livro = session.get(Livro, livro_id)
+
+    if not livro:
+        raise HTTPException(status_code=404, detail="Livro não encontrado")
+
+    return livro.trechos
+
+
+@app.delete(
+    "/trechos/{trecho_id}",
+    status_code=status.HTTP_204_NO_CONTENT,
+    summary="Deletar trecho",
+    description="Deleta um trecho do livro do usuário.",
+    tags=["Trechos"],
+)
+def deletar_trecho(trecho_id: int, session: SessionDep):
+    trecho = session.get(Trecho, trecho_id)
+
+    if not trecho:
+        raise HTTPException(status_code=404, detail="Trecho não encontrado")
+
+    session.delete(trecho)
+    session.commit()

@@ -1,8 +1,10 @@
 from datetime import date
 from typing import Optional
 
-from sqlmodel import SQLModel, Field
+from sqlmodel import SQLModel, Relationship, Field
 from enum import Enum
+
+from models.trecho import Trecho
 
 
 class LivroStatus(str, Enum):
@@ -30,3 +32,5 @@ class Livro(SQLModel, table=True):
     data_fim: Optional[date] = None
 
     status: LivroStatus = LivroStatus.QUERO_LER
+
+    trechos: list["Trecho"] = Relationship(back_populates="livro", cascade_delete=True)
