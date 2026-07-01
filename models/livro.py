@@ -34,4 +34,6 @@ class Livro(SQLModel, table=True):
 
     status: LivroStatus = Field(default=LivroStatus.QUERO_LER)
 
+    imagem_url: str | None = None
+
     trechos: List["Trecho"] = Relationship(back_populates="livro", cascade_delete=True)

@@ -10,6 +10,7 @@ from database import engine, get_session
 
 from models.livro import Livro, LivroStatus
 from schemas.livro import LivroCreate, LivroUpdate
+from services.open_library import buscar_capa_livro
 
 from models.trecho import Trecho
 from schemas.trecho import TrechoCreate
@@ -45,7 +46,9 @@ def on_startup():
     tags=["Livros"],
 )
 def criar_livro(livro: LivroCreate, session: SessionDep) -> Livro:
-    novo_livro = Livro(**livro.model_dump())
+    capa = buscar_capa_livro(livro.nome, livro.autor)
+
+    novo_livro = Livro(**livro.model_dump(), imagem_url=capa)
 
     session.add(novo_livro)
 
